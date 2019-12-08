@@ -28,6 +28,43 @@ public class SPHSystem : JobComponentSystem
         -1, 1, 1, -1, 1, 0, -1, 1, -1, -1, 0, 1, -1, 0, 0, -1, 0, -1, -1, -1, 1, -1, -1, 0, -1, -1, -1
     };
 
+    private struct PreviousParticle
+    {
+#pragma warning disable 0649
+        public NativeMultiHashMap<int, int> hashMap;
+        public NativeArray<Translation> particlesPosition;
+        public NativeArray<SPHVelocity> particlesVelocity;
+        public NativeArray<float3> particlesForces;
+        public NativeArray<float> particlesPressure;
+        public NativeArray<float> particlesDensity;
+        public NativeArray<int> particleIndices;
+
+        public NativeArray<int> cellOffsetTable;
+#pragma warning restore 0649
+    }
+
+    [BurstCompile]
+    private struct HashPositions : IJobParallelFor
+    {
+#pragma warning disable 0649
+        [ReadOnly] public float cellRadius;
+
+        public NativeArray<Translation> positions;
+        public NativeMultiHashMap<int, int>.ParallelWriter hashMap;
+#pragma warning restore 0649
+
+        public void Execute(int index)
+        {
+            float3 position = positions[index].Value;
+
+            int hash = GridHash.Hash(position, cellRadius);
+            hashMap.Add(hash, index);
+
+            positions[index] = new Translation { Value = position };
+        }
+    }
+
+
 
     protected override void OnCreate()
     {
@@ -48,7 +85,33 @@ public class SPHSystem : JobComponentSystem
 
         for(int typeIndex = 1; typeIndex < uniqueTypes.Count; typeIndex++)
         {
+            //Get the current chucnk setting
+            SPHParticle settings = uniqueTypes[typeIndex];
+            SPHCharacterGroup.SetFilter(settings);
 
+            //cache the data 
+            collidersToNativeArrayJobHandle particlePositionJobHandle;
+            ComponentDataArray<Translation> particlePosition = SPHCharacterGroup.ToComponentDataArray<Translation>(Allocator.TempJob, out particlePositionJobHandle);
+            collidersToNativeArrayJobHandle particleVelocityJobHandle;
+            ComponentDataArray<SPHVelocity> particleVelocity = SPHCharacterGroup.ToComponentDataArray<SPHVelocity>(Allocator.TempJob, out particleVelocityJobHandle);
+
+            int cacheIndex = typeIndex - 1;
+            int particleCount = particlePosition.Length;
+
+            NativeMultiHashMap<int, int> hashMap = new NativeMultiHashMap<int, int>(particleCount, Allocator.TempJob);
+
+            NativeArray<float3> particlesForces = new NativeArray<float3>(particleCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            NativeArray<float> particlesPressure = new NativeArray<float>(particleCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            NativeArray<float> particlesDensity = new NativeArray<float>(particleCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            NativeArray<int> particleIndices = new NativeArray<int>(particleCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+
+            NativeArray<int> cellsOffsetTableNative = new NativeArray<int>(cellOffsetTable, Allocator.TempJob);
+
+            //Add new or dispose previous particle chunks
+            PreviousParticles nextParticles = new PreviousParticles
+            {
+
+            }
         }
     }
 
