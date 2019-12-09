@@ -94,14 +94,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SerializedData:
-    radius: 0
-    smoothingRadius: 0
-    smoothingRadiusSq: 0
-    mass: 0
-    restDensity: 0
-    viscosity: 0
-    gravityMult: 0
-    drag: 0
+    radius: 1
+    smoothingRadius: 1
+    smoothingRadiusSq: 1
+    mass: 40
+    restDensity: 5000
+    viscosity: 0.1
+    gravityMult: 1500
+    drag: 0.025
 --- !u!114 &7326688897652291379
 MonoBehaviour:
   m_ObjectHideFlags: 0

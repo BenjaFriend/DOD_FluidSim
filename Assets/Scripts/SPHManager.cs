@@ -4,9 +4,9 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using Unity.Collections;
 
-
 public class SPHManager : MonoBehaviour
 {
+
     // Import
     [Header("Import")]
     [SerializeField] private GameObject SPHParticlePrefab = null;
@@ -17,43 +17,21 @@ public class SPHManager : MonoBehaviour
     [Header("Properties")]
     [SerializeField] private int amount = 5000;
 
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         manager = World.Active.EntityManager;
 
+        // Setup
         AddColliders();
         AddParticles(amount);
     }
 
-    void AddColliders()
+    private void AddParticles(int _amount)
     {
-        GameObject[] colliders = GameObject.FindGameObjectsWithTag("SPHCollider");
-
-        //Convert to entities
-        NativeArray<Entity> entities = new NativeArray<Entity>(colliders.Length, Allocator.Temp);
-        manager.Instantiate(SPHColliderPrefab, entities);
-
-        for(int i = 0; i < colliders.Length; i++)
-        {
-            manager.SetComponentData(entities[i], new SPHCollider
-            {
-                position = colliders[i].transform.position,
-                right = colliders[i].transform.right,
-                up = colliders[i].transform.up,
-                scale = new float2(colliders[i].transform.localScale.x / 2f, colliders[i].transform.localScale.y /2f)
-            });
-        }
-
-        entities.Dispose();
-    }
-
-    void AddParticles(int t_Amount)
-    {
-        NativeArray<Entity> entities = new NativeArray<Entity>(t_Amount, Allocator.Temp);
+        NativeArray<Entity> entities = new NativeArray<Entity>(_amount, Allocator.Temp);
         manager.Instantiate(SPHParticlePrefab, entities);
 
-        for (int i = 0; i < t_Amount; i++)
+        for (int i = 0; i < _amount; i++)
         {
             manager.SetComponentData(entities[i], new Translation { Value = new float3(i % 16 + UnityEngine.Random.Range(-0.1f, 0.1f), 2 + (i / 16 / 16) * 1.1f, (i / 16) % 16) + UnityEngine.Random.Range(-0.1f, 0.1f) });
         }
@@ -61,4 +39,28 @@ public class SPHManager : MonoBehaviour
         entities.Dispose();
     }
 
+    private void AddColliders()
+    {
+        // Find all colliders
+        GameObject[] colliders = GameObject.FindGameObjectsWithTag("SPHCollider");
+
+        // Turn them into entities
+        NativeArray<Entity> entities = new NativeArray<Entity>(colliders.Length, Allocator.Temp);
+        manager.Instantiate(SPHColliderPrefab, entities);
+
+        // Set data
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            manager.SetComponentData(entities[i], new SPHCollider
+            {
+                position = colliders[i].transform.position,
+                right = colliders[i].transform.right,
+                up = colliders[i].transform.up,
+                scale = new float2(colliders[i].transform.localScale.x / 2f, colliders[i].transform.localScale.y / 2f)
+            });
+        }
+
+        // Done
+        entities.Dispose();
+    }
 }

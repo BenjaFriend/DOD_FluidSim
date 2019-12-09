@@ -29,9 +29,11 @@ public class SPHSystem : JobComponentSystem
         -1, 1, 1, -1, 1, 0, -1, 1, -1, -1, 0, 1, -1, 0, 0, -1, 0, -1, -1, -1, 1, -1, -1, 0, -1, -1, -1
     };
 
+
+
     private struct PreviousParticle
     {
-#pragma warning disable 0649
+        #pragma warning disable 0649
         public NativeMultiHashMap<int, int> hashMap;
         public NativeArray<Translation> particlesPosition;
         public NativeArray<SPHVelocity> particlesVelocity;
@@ -41,18 +43,20 @@ public class SPHSystem : JobComponentSystem
         public NativeArray<int> particleIndices;
 
         public NativeArray<int> cellOffsetTable;
-#pragma warning restore 0649
+        #pragma warning restore 0649
     }
+
+
 
     [BurstCompile]
     private struct HashPositions : IJobParallelFor
     {
-#pragma warning disable 0649
+        #pragma warning disable 0649
         [ReadOnly] public float cellRadius;
 
         public NativeArray<Translation> positions;
         public NativeMultiHashMap<int, int>.ParallelWriter hashMap;
-#pragma warning restore 0649
+        #pragma warning restore 0649
 
         public void Execute(int index)
         {
@@ -65,11 +69,13 @@ public class SPHSystem : JobComponentSystem
         }
     }
 
+
+
     [BurstCompile]
     private struct MergeParticles : IJobNativeMultiHashMapMergedSharedKeyIndices
     {
         public NativeArray<int> particleIndices;
-#pragma warning restore 0649
+        #pragma warning restore 0649
 
 
 
@@ -85,10 +91,12 @@ public class SPHSystem : JobComponentSystem
         }
     }
 
+
+
     [BurstCompile]
     private struct ComputeDensityPressure : IJobParallelFor
     {
-#pragma warning disable 0649
+        #pragma warning disable 0649
         [ReadOnly] public NativeMultiHashMap<int, int> hashMap;
         [ReadOnly] public NativeArray<int> cellOffsetTable;
         [ReadOnly] public NativeArray<Translation> particlesPosition;
@@ -96,10 +104,12 @@ public class SPHSystem : JobComponentSystem
 
         public NativeArray<float> densities;
         public NativeArray<float> pressures;
-#pragma warning restore 0649
+        #pragma warning restore 0649
 
         private const float PI = 3.14159274F;
         private const float GAS_CONST = 2000.0f;
+
+        
 
         public void Execute(int index)
         {
@@ -142,10 +152,12 @@ public class SPHSystem : JobComponentSystem
         }
     }
 
+
+
     [BurstCompile]
     private struct ComputeForces : IJobParallelFor
     {
-#pragma warning disable 0649
+        #pragma warning disable 0649
         [ReadOnly] public NativeMultiHashMap<int, int> hashMap;
         [ReadOnly] public NativeArray<int> cellOffsetTable;
         [ReadOnly] public NativeArray<Translation> particlesPosition;
@@ -155,9 +167,11 @@ public class SPHSystem : JobComponentSystem
         [ReadOnly] public SPHParticle settings;
 
         public NativeArray<float3> particlesForces;
-#pragma warning restore 0649
+        #pragma warning restore 0649
 
         private const float PI = 3.14159274F;
+
+
 
         public void Execute(int index)
         {
@@ -216,18 +230,22 @@ public class SPHSystem : JobComponentSystem
         }
     }
 
+
+
     [BurstCompile]
     private struct Integrate : IJobParallelFor
     {
-#pragma warning disable 0649
+        #pragma warning disable 0649
         [ReadOnly] public NativeArray<float3> particlesForces;
         [ReadOnly] public NativeArray<float> particlesDensity;
 
         public NativeArray<Translation> particlesPosition;
         public NativeArray<SPHVelocity> particlesVelocity;
-#pragma warning restore 0649
+        #pragma warning restore 0649
 
         private const float DT = 0.0008f;
+
+
 
         public void Execute(int index)
         {
@@ -245,18 +263,22 @@ public class SPHSystem : JobComponentSystem
         }
     }
 
+
+
     [BurstCompile]
     private struct ComputeColliders : IJobParallelFor
     {
-#pragma warning disable 0649
+        #pragma warning disable 0649
         [ReadOnly] public SPHParticle settings;
         [ReadOnly] public NativeArray<SPHCollider> copyColliders;
 
         public NativeArray<Translation> particlesPosition;
         public NativeArray<SPHVelocity> particlesVelocity;
-#pragma warning restore 0649
+        #pragma warning restore 0649
 
         private const float BOUND_DAMPING = -0.5f;
+
+
 
         private static bool Intersect(SPHCollider collider, float3 position, float radius, out float3 penetrationNormal, out float3 penetrationPosition, out float penetrationLength)
         {
@@ -271,6 +293,8 @@ public class SPHSystem : JobComponentSystem
                 && math.abs(math.dot(colliderProjection, collider.up)) < collider.scale.y;
         }
 
+
+
         private static Vector3 DampVelocity(SPHCollider collider, float3 velocity, float3 penetrationNormal, float drag)
         {
             float3 newVelocity = math.dot(velocity, penetrationNormal) * penetrationNormal * BOUND_DAMPING
@@ -281,6 +305,8 @@ public class SPHSystem : JobComponentSystem
                         + math.dot(newVelocity, new float3(0, 1, 0)) * new float3(0, 1, 0);
             return newVelocity;
         }
+
+
 
         public void Execute(int index)
         {
@@ -319,6 +345,8 @@ public class SPHSystem : JobComponentSystem
             sphCollider = new SPHVelocity { Value = particlesVelocity[index].Value };
         }
     }
+    
+
 
     protected override void OnCreate()
     {
@@ -327,11 +355,15 @@ public class SPHSystem : JobComponentSystem
         SPHColliderGroup = GetEntityQuery(ComponentType.ReadOnly(typeof(SPHCollider)));
     }
 
+
+
     protected override void OnStartRunning()
     {
         // Get the colliders
         colliders = SPHColliderGroup.ToComponentDataArray<SPHCollider>(Allocator.Persistent, out collidersToNativeArrayJobHandle);
     }
+    
+
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
@@ -364,6 +396,8 @@ public class SPHSystem : JobComponentSystem
 
             NativeArray<int> cellOffsetTableNative = new NativeArray<int>(cellOffsetTable, Allocator.TempJob);
 
+
+
             // Add new or dispose previous particle chunks
             PreviousParticle nextParticles = new PreviousParticle
             {
@@ -394,6 +428,8 @@ public class SPHSystem : JobComponentSystem
             }
             previousParticles[cacheIndex] = nextParticles;
 
+
+
             // Initialize the empty arrays with a default value
             MemsetNativeArray<float> particlesPressureJob = new MemsetNativeArray<float> { Source = particlesPressure, Value = 0.0f };
             JobHandle particlesPressureJobHandle = particlesPressureJob.Schedule(particleCount, 64, inputDeps);
@@ -406,6 +442,8 @@ public class SPHSystem : JobComponentSystem
 
             MemsetNativeArray<float3> particlesForcesJob = new MemsetNativeArray<float3> { Source = particlesForces, Value = new float3(0, 0, 0) };
             JobHandle particlesForcesJobHandle = particlesForcesJob.Schedule(particleCount, 64, inputDeps);
+
+
 
             // Put positions into a hashMap
             HashPositions hashPositionsJob = new HashPositions
@@ -491,7 +529,6 @@ public class SPHSystem : JobComponentSystem
         uniqueTypes.Clear();
         return inputDeps;
     }
-
     protected override void OnStopRunning()
     {
         EntityManager.CompleteAllJobs();
