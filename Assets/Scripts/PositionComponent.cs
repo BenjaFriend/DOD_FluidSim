@@ -7,7 +7,7 @@ using Unity.Mathematics;
 [System.Serializable]
 public struct Position : IComponentData
 {
-    public float3 value;
+    public float3 Value;
 }
 
 public class PositionComponent : ComponentDataProxy<Position> { }

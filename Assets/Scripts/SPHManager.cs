@@ -9,8 +9,8 @@ public class SPHManager : MonoBehaviour
 {
     // Import
     [Header("Import")]
-    [SerializeField] private GameObject sphParticlePrefab = null;
-    [SerializeField] private GameObject sphColliderPrefab = null;
+    [SerializeField] private GameObject SPHParticlePrefab = null;
+    [SerializeField] private GameObject SPHColliderPrefab = null;
     private EntityManager manager;
 
     // Properties
@@ -32,7 +32,7 @@ public class SPHManager : MonoBehaviour
 
         //Convert to entities
         NativeArray<Entity> entities = new NativeArray<Entity>(colliders.Length, Allocator.Temp);
-        manager.Instantiate(sphColliderPrefab, entities);
+        manager.Instantiate(SPHColliderPrefab, entities);
 
         for(int i = 0; i < colliders.Length; i++)
         {
@@ -51,7 +51,7 @@ public class SPHManager : MonoBehaviour
     void AddParticles(int t_Amount)
     {
         NativeArray<Entity> entities = new NativeArray<Entity>(t_Amount, Allocator.Temp);
-        manager.Instantiate(sphParticlePrefab, entities);
+        manager.Instantiate(SPHParticlePrefab, entities);
 
         for (int i = 0; i < t_Amount; i++)
         {
@@ -61,9 +61,4 @@ public class SPHManager : MonoBehaviour
         entities.Dispose();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

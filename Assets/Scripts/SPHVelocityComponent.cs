@@ -7,7 +7,7 @@ using Unity.Mathematics;
 [System.Serializable]
 public struct SPHVelocity : IComponentData
 {
-    public float3 value;
+    public float3 Value;
 }
 
 public class SPHVelocityComponent : ComponentDataProxy<SPHVelocity> { }
