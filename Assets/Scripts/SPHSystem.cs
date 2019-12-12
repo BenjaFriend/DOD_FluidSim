@@ -368,7 +368,7 @@ public class SPHSystem : JobComponentSystem
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         if (cameraTransform == null)
-            cameraTransform = GameObject.Find("Main Camera").transform;
+            cameraTransform = Camera.main.transform;
 
         EntityManager.GetAllUniqueSharedComponentData(uniqueTypes);
 
