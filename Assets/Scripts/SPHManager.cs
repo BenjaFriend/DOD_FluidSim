@@ -17,7 +17,7 @@ public class SPHManager : MonoBehaviour
 
     // Properties
     [Header("Properties")]
-    [SerializeField] private int InitalSpawnAmount = 5000;
+    [SerializeField] private int InitalSpawnAmount = 1000;
 
     [Header("UI")]
     public TextMeshProUGUI EntityCountLabel = null;
