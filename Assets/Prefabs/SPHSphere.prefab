@@ -120,4 +120,4 @@ MonoBehaviour:
     subMesh: 0
     layer: 0
     castShadows: 0
-    receiveShadows: 1
+    receiveShadows: 0
